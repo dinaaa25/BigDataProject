@@ -1,6 +1,14 @@
 from pyspark.sql import SparkSession
 
-spark: SparkSession = SparkSession.builder.getOrCreate()
+# spark: spark = (
+# SparkSession.builder.appName("SongProject")
+# .master("http://spark-head5.eemcs.utwente.nl:4040")
+# .getOrCreate()
+# )
+
+spark = SparkSession.builder.remote(
+    "sc://spark-head5.eemcs.utwente.nl:4040"
+).getOrCreate()
 
 """
 paths to data on hdfs
@@ -28,6 +36,14 @@ class DataFrameLoader:
             .toDF(["id", "genre"])
         )
 
+    def load_genre_types_df(self):
+        """
+        returns a list with the unique genretypes
+        """
+        genreData = self.load_genre_df(genre_path)
+        distinctDF = genreData.select("genre").distinct()
+        return distinctDF.rdd.map(lambda x: x.genre).collect()
+
     def load_song_df(self, path: str):
         """
         returns the df with all attributes from the song dataset
@@ -54,6 +70,9 @@ class DataFrameLoader:
 preview the result of the genre df
 
 """
-# rdd1 = load_genre_df(genre_path)
-# df = rdd1.toDF(["id", "genre"])
-# df.show()
+
+dataframeloader = DataFrameLoader()
+
+rdd1 = dataframeloader.load_genre_df(genre_path)
+df = rdd1.toDF(["id", "genre"])
+df.show()
