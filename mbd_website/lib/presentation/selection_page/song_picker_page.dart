@@ -62,30 +62,59 @@ class _BubbleScreenState extends State<BubbleScreen> {
     'Hardstyle',
   ];
 
+  // The logic to find the nearest point on the circle and add a bubble
+  void onBubbleDroppedInBox(String genre, Offset droppedPosition,
+      Offset circleCenter, double circleRadius) {
+    print('bubble dropped in box');
+    // Convert the dropped position to an angle
+    double dropAngle = math.atan2(droppedPosition.dy - circleCenter.dy,
+        droppedPosition.dx - circleCenter.dx);
+
+    // Normalize the angle
+    dropAngle = (dropAngle < 0) ? (2 * math.pi + dropAngle) : dropAngle;
+
+    // This is a simple way to add the genre to the active list for now
+    // You will need more complex logic to place it correctly
+    setState(() {
+      genres.add(genre);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-     // Assuming the container for the bubbles is a square
+    // Assuming the container for the bubbles is a square
     final double containerWidth = MediaQuery.of(context).size.width * 0.4;
     final double containerHeight = MediaQuery.of(context).size.height * 0.8;
     final Offset center = Offset(containerWidth / 2, containerHeight / 2);
-    final double circleRadius = containerWidth / 3; // The radius is half the width of the container
+    final double circleRadius =
+        containerWidth / 3; // The radius is half the width of the container
     const double bubbleDiameter = 100;
 
     List<Widget> positionedBubbles = genres.asMap().entries.map((entry) {
       int index = entry.key;
       String genre = entry.value;
-      
+
       const double startAngle = -math.pi / 2;
       // Calculate position for each bubble
       final double angle = startAngle + (2 * math.pi / genres.length) * index;
       // Calculate the bubble's center point based on the center of the container
-      final double x = center.dx + circleRadius * math.cos(angle) - bubbleDiameter / 2; // Adjust for the size of the bubble
-      final double y = center.dy + circleRadius * math.sin(angle) - bubbleDiameter / 2; // Adjust for the size of the bubble
+      final double x = center.dx +
+          circleRadius * math.cos(angle) -
+          bubbleDiameter / 2; // Adjust for the size of the bubble
+      final double y = center.dy +
+          circleRadius * math.sin(angle) -
+          bubbleDiameter / 2; // Adjust for the size of the bubble
 
       return Positioned(
         left: x,
         top: y,
-        child: DraggableBubble(genre: genre, diameter: bubbleDiameter),
+        child: DraggableBubble(
+          genre: genre,
+          diameter: bubbleDiameter,
+          onBubbleDroppedInBox: onBubbleDroppedInBox,
+          circleCenter: center,
+          circleRadius: circleRadius,
+        ),
       );
     }).toList();
 
@@ -108,7 +137,12 @@ class _BubbleScreenState extends State<BubbleScreen> {
                 itemCount: inactiveGenres.length,
                 itemBuilder: (context, index) {
                   return DraggableBubble(
-                      genre: inactiveGenres[index], diameter: 70);
+                    genre: inactiveGenres[index],
+                    diameter: 70,
+                    onBubbleDroppedInBox: onBubbleDroppedInBox,
+                    circleCenter: center,
+                    circleRadius: circleRadius,
+                  );
                 },
               ),
             ),
@@ -134,16 +168,27 @@ class _BubbleScreenState extends State<BubbleScreen> {
 class DraggableBubble extends StatelessWidget {
   final String genre;
   final double diameter;
+  final Offset circleCenter;
+  final double circleRadius;
+
+  final Function onBubbleDroppedInBox;
 
   const DraggableBubble({
     Key? key,
     required this.genre,
     required this.diameter,
+    required this.onBubbleDroppedInBox,
+    required this.circleCenter,
+    required this.circleRadius,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Draggable<String>(
+      onDragEnd: (details) {
+        print('drag end');
+        onBubbleDroppedInBox(genre, details.offset, circleCenter, circleRadius);
+      },
       data: genre,
       feedback: BubbleWidget(genre: genre, diameter: diameter),
       childWhenDragging: Opacity(
