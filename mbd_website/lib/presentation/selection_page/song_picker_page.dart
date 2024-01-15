@@ -10,31 +10,41 @@ class SongPickerPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Song Picker'),
       ),
-      body: const BubbleCircle(),
+      body: const BubbleScreen(),
     );
   }
 }
 
-class BubbleCircle extends StatelessWidget {
-  const BubbleCircle({super.key});
+class BubbleScreen extends StatelessWidget {
+  const BubbleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Using MediaQuery to get screen size
-    final screenSize = MediaQuery.of(context).size;
-    final squareSize = math.min(screenSize.width, screenSize.height) * 0.8;
-    final circleDiameter = squareSize * 0.8;
+    // Calculate the diameter for the circle based on the screen size
+    final double diameter =
+        MediaQuery.of(context).size.width * 0.4; // 80% of the screen width
+    final double radius = diameter / 2;
+    final Offset center = Offset(
+        radius, radius); // Since the circle is in the center of the square
 
-    return Center(
-      child: Container(
-        width: squareSize,
-        height: squareSize,
-        decoration: BoxDecoration(
-          color: Colors.grey[300], // Background color for the square
-          shape: BoxShape.rectangle,
-        ),
-        child: CustomPaint(
-          painter: BubblePainter(circleDiameter),
+    // Example genres list
+    final List<String> genres = ['Jazz', 'Pop', 'Rock', 'Latin', 'Classical'];
+
+    return Scaffold(
+      body: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(diameter, diameter),
+              painter: BubblePainter(
+                diameter,
+                genres.length,
+                genres,
+                bubbleRadius: 60,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -43,42 +53,51 @@ class BubbleCircle extends StatelessWidget {
 
 class BubblePainter extends CustomPainter {
   final double diameter;
+  final double bubbleRadius;
+  final int numBubbles;
+  final List<String> genres;
 
-  BubblePainter(this.diameter);
+  BubblePainter(this.diameter, this.numBubbles, this.genres,
+      {this.bubbleRadius = 20.0});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint circlePaint = Paint()
-      ..color = Colors.blue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0;
-
     final Paint bubblePaint = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.fill;
 
-    // Center of the square
     final Offset center = Offset(size.width / 2, size.height / 2);
-    // Radius of the circle
-    final double radius = diameter / 2;
+    final double radius = diameter / 2 - bubbleRadius;
 
-    // Draw the main circle
-    canvas.drawCircle(center, radius, circlePaint);
-
-    // Calculate the bubble positions and draw them
-    const int numberOfBubbles = 3;
-    // Adjust the starting angle to be at the top center
-    final double startAngle = -math.pi / 2;
-    for (int i = 0; i < numberOfBubbles; i++) {
-      // Angle calculation for bubble placement
-      double angle = startAngle + (2 * math.pi / numberOfBubbles) * i;
-      // Bubble position
+    const double startAngle = -math.pi / 2;
+    for (int i = 0; i < numBubbles; i++) {
+      double angle = startAngle + (2 * math.pi / numBubbles) * i;
       Offset bubblePosition = Offset(
         center.dx + radius * math.cos(angle),
         center.dy + radius * math.sin(angle),
       );
-      // Draw the bubble
-      canvas.drawCircle(bubblePosition, 20.0, bubblePaint); // Bubble radius is set to 20.0
+
+      canvas.drawCircle(
+          bubblePosition, bubbleRadius, bubblePaint); // Draw the bubble
+
+      // Draw the text
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: genres[i],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+
+      // Calculate the position to center the text inside the bubble
+      final Offset textPosition = bubblePosition -
+          Offset(textPainter.width / 2, textPainter.height / 2);
+      textPainter.paint(canvas, textPosition);
     }
   }
 
@@ -87,6 +106,3 @@ class BubblePainter extends CustomPainter {
     return false;
   }
 }
-
-
-
