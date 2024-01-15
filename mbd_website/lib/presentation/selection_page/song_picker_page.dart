@@ -15,33 +15,113 @@ class SongPickerPage extends StatelessWidget {
   }
 }
 
-class BubbleScreen extends StatelessWidget {
+class BubbleScreen extends StatefulWidget {
   const BubbleScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Calculate the diameter for the circle based on the screen size
-    final double diameter =
-        MediaQuery.of(context).size.width * 0.4; // 80% of the screen width
-    final double radius = diameter / 2;
-    final Offset center = Offset(
-        radius, radius); // Since the circle is in the center of the square
+  _BubbleScreenState createState() => _BubbleScreenState();
+}
 
-    // Example genres list
-    final List<String> genres = ['Jazz', 'Pop', 'Rock', 'Latin', 'Classical'];
+class _BubbleScreenState extends State<BubbleScreen> {
+  final List<String> genres = [
+    'Jazz',
+    'Pop',
+    'Rock',
+    'Latin',
+    'Classical',
+    'Metal'
+  ];
+
+  final List<String> inactiveGenres = [
+    'Country',
+    'Hip Hop',
+    'R&B',
+    'Electronic',
+    'Folk',
+    'Blues',
+    'Reggae',
+    'Punk',
+    'Disco',
+    'Funk',
+    'Soul',
+    'Techno',
+    'Gospel',
+    'Opera',
+    'Ska',
+    'New Age',
+    'Ambient',
+    'Industrial',
+    'Grunge',
+    'Dance',
+    'Dubstep',
+    'Drum and Bass',
+    'Trance',
+    'House',
+    'Garage',
+    'Hardcore',
+    'Hardstyle',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+     // Assuming the container for the bubbles is a square
+    final double containerWidth = MediaQuery.of(context).size.width * 0.4;
+    final double containerHeight = MediaQuery.of(context).size.height * 0.8;
+    final Offset center = Offset(containerWidth / 2, containerHeight / 2);
+    final double circleRadius = containerWidth / 3; // The radius is half the width of the container
+    const double bubbleDiameter = 100;
+
+    List<Widget> positionedBubbles = genres.asMap().entries.map((entry) {
+      int index = entry.key;
+      String genre = entry.value;
+      
+      const double startAngle = -math.pi / 2;
+      // Calculate position for each bubble
+      final double angle = startAngle + (2 * math.pi / genres.length) * index;
+      // Calculate the bubble's center point based on the center of the container
+      final double x = center.dx + circleRadius * math.cos(angle) - bubbleDiameter / 2; // Adjust for the size of the bubble
+      final double y = center.dy + circleRadius * math.sin(angle) - bubbleDiameter / 2; // Adjust for the size of the bubble
+
+      return Positioned(
+        left: x,
+        top: y,
+        child: DraggableBubble(genre: genre, diameter: bubbleDiameter),
+      );
+    }).toList();
 
     return Scaffold(
       body: Center(
-        child: Stack(
-          alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CustomPaint(
-              size: Size(diameter, diameter),
-              painter: BubblePainter(
-                diameter,
-                genres.length,
-                genres,
-                bubbleRadius: 60,
+            // Inactive genres list
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.2,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: inactiveGenres.length,
+                itemBuilder: (context, index) {
+                  return DraggableBubble(
+                      genre: inactiveGenres[index], diameter: 70);
+                },
+              ),
+            ),
+            // Draggable bubbles area
+            Container(
+              width: containerWidth,
+              height: MediaQuery.of(context).size.height * 0.8,
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Stack(
+                children: positionedBubbles,
               ),
             ),
           ],
@@ -51,58 +131,59 @@ class BubbleScreen extends StatelessWidget {
   }
 }
 
-class BubblePainter extends CustomPainter {
+class DraggableBubble extends StatelessWidget {
+  final String genre;
   final double diameter;
-  final double bubbleRadius;
-  final int numBubbles;
-  final List<String> genres;
 
-  BubblePainter(this.diameter, this.numBubbles, this.genres,
-      {this.bubbleRadius = 20.0});
+  const DraggableBubble({
+    Key? key,
+    required this.genre,
+    required this.diameter,
+  }) : super(key: key);
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final Paint bubblePaint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill;
-
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final double radius = diameter / 2 - bubbleRadius;
-
-    const double startAngle = -math.pi / 2;
-    for (int i = 0; i < numBubbles; i++) {
-      double angle = startAngle + (2 * math.pi / numBubbles) * i;
-      Offset bubblePosition = Offset(
-        center.dx + radius * math.cos(angle),
-        center.dy + radius * math.sin(angle),
-      );
-
-      canvas.drawCircle(
-          bubblePosition, bubbleRadius, bubblePaint); // Draw the bubble
-
-      // Draw the text
-      final TextPainter textPainter = TextPainter(
-        text: TextSpan(
-          text: genres[i],
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
-
-      // Calculate the position to center the text inside the bubble
-      final Offset textPosition = bubblePosition -
-          Offset(textPainter.width / 2, textPainter.height / 2);
-      textPainter.paint(canvas, textPosition);
-    }
+  Widget build(BuildContext context) {
+    return Draggable<String>(
+      data: genre,
+      feedback: BubbleWidget(genre: genre, diameter: diameter),
+      childWhenDragging: Opacity(
+        opacity: 0.5,
+        child: BubbleWidget(genre: genre, diameter: diameter),
+      ),
+      child: BubbleWidget(genre: genre, diameter: diameter),
+    );
   }
+}
+
+class BubbleWidget extends StatelessWidget {
+  final String genre;
+  final double diameter;
+
+  const BubbleWidget({
+    Key? key,
+    required this.genre,
+    required this.diameter,
+  }) : super(key: key);
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  Widget build(BuildContext context) {
+    return Container(
+      width: diameter,
+      height: diameter,
+      decoration: const BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        genre,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }
