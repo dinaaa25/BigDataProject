@@ -74,5 +74,5 @@ preview the result of the genre df
 dataframeloader = DataFrameLoader()
 
 rdd1 = dataframeloader.load_genre_df(genre_path)
-df = rdd1.toDF(["id", "genre"])
+df = rdd1.toDF("id", "genre")
 df.show()
