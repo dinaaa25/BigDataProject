@@ -23,6 +23,8 @@ class BubbleScreen extends StatefulWidget {
 }
 
 class _BubbleScreenState extends State<BubbleScreen> {
+  final GlobalKey containerKey = GlobalKey();
+
   final List<String> genres = [
     'Jazz',
     'Pop',
@@ -90,6 +92,8 @@ class _BubbleScreenState extends State<BubbleScreen> {
         containerWidth / 3; // The radius is half the width of the container
     const double bubbleDiameter = 100;
 
+    List<Map<String, double>> bubblePositions = [];
+
     List<Widget> positionedBubbles = genres.asMap().entries.map((entry) {
       int index = entry.key;
       String genre = entry.value;
@@ -104,6 +108,9 @@ class _BubbleScreenState extends State<BubbleScreen> {
       final double y = center.dy +
           circleRadius * math.sin(angle) -
           bubbleDiameter / 2; // Adjust for the size of the bubble
+
+      //set the bubblePositions
+      bubblePositions.add({'x': x, 'y': y});
 
       return Positioned(
         left: x,
@@ -147,15 +154,32 @@ class _BubbleScreenState extends State<BubbleScreen> {
               ),
             ),
             // Draggable bubbles area
-            Container(
-              width: containerWidth,
-              height: MediaQuery.of(context).size.height * 0.8,
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-              ),
-              child: Stack(
-                children: positionedBubbles,
+            GestureDetector(
+              onTapUp: (details) {
+                // Obtain the local position of the tap
+                final RenderBox box = containerKey.currentContext!.findRenderObject() as RenderBox;
+                final Offset localPosition =
+                    box.globalToLocal(details.globalPosition);
+
+                // Calculate the offset from the center
+                final Offset offsetFromCenter = localPosition - center;
+
+                // If you need just the distance from the center
+                final double distanceFromCenter = offsetFromCenter.distance;
+
+                
+              },
+              child: Container(
+                key: containerKey,
+                width: containerWidth,
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: Stack(
+                  children: positionedBubbles,
+                ),
               ),
             ),
           ],
