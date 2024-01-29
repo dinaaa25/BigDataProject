@@ -1,5 +1,8 @@
 #-------------IMPORTS----------------------------------------------
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import * 
+import pyspark.sql.types as type
+from pyspark.sql.window import Window
 
 #-------------CREATE_SPARK_SESSION-----------------------------------
 # spark: spark = (
@@ -77,6 +80,36 @@ class DataFrameLoader:
         #songData = songData.select("track_id")
         return songData.join(genreData, songData.track_id == genreData.id, joinType)
 
+    def random_forrest_processing(self, df, prediction_features):
+        """
+            Prepare the dataFrame for further processing
+            by converting the feature columns to numeric input
+            It contains all the features for prediction and corresponding class,
+            where the rows are indexed by track_id
+        """
+        # add any columns to keep which are not prediction_features
+        add_cols = ["track_id", "genre"]
+        df_extra = df.select(add_cols)
+
+        # select only feature columns, then replace NaN values with 0
+        df_features = df.select(prediction_features).fillna(0)
+
+        # cast all feature columns to numeric values
+        df_features = df_features.select(*(df_features[f].cast("float").alias(f) for f in prediction_features))
+
+        # join the features, track_id and genre
+        # this is done by creating a joining index and appending it to each dataFrame
+        w = Window().orderBy(lit("X"))
+        df_extra = df_extra.withColumn('rand_id', row_number().over(w))
+        df_features = df_features.withColumn('rand_id', row_number().over(w))
+        # join the dataFrames and drop the index
+        df_input = df_extra.join(df_features, on=['rand_id']).drop('rand_id')
+
+        # uncomment to preview the returned DataFrame
+        # df_input.show(10)
+
+        return df_input
+
 dataframeloader = DataFrameLoader()
 
 #------------------PREVIEW_DATA-------------------------------------------------
@@ -101,11 +134,13 @@ Preview the result of the song df
 
 #------------------SAVE_DATAFRAME--------------------------------------------
 """
-Export a dataframe containing the song id and corresponding genres to parquet files 
+Export a dataframe containing the track id, corresponding genres and prediction features to parquet files 
 """
+pred_features = ["danceability", "duration", "energy", "key", "loudness", "tempo", "year", "artist_playmeid"]
+
 for p in range(5):
     song_path_full = song_path + (str(chr(ord('A') + p)) + ".csv")
-    df_for_ml = dataframeloader.join_dataframes(song_path_full, useAllTracks=False)
+    df_for_ml = dataframeloader.random_forrest_processing(dataframeloader.join_dataframes(song_path_full, useAllTracks=False), pred_features)
     print(df_for_ml.count()) #-> 38367, 36618, 35955, 35724, 35241 tracks in the sets
 
     #df_for_ml = df_joined
