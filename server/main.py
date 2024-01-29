@@ -10,27 +10,27 @@ sys.path.append("..")
 app = FastAPI()
 
 results = pandas.read_parquet("../results.parquet")
+songs = pandas.read_csv("../songNames.csv")
 
 
 def getSongByPercentages(percentages):
     diffSum = 0
     track_id = 0
-    for _, row in results.iterrows():
+    for i, row in results.iterrows():
         localSum = 0
         for percentage in percentages:
-            diff = row[percentage] - percentages[percentage]
+            diff = (row[percentage] - percentages[percentage]) ** 2
             localSum = localSum + diff
+
+        if i == 0:
+            diffSum = localSum
 
         if diffSum > localSum:
             diffSum = localSum
             track_id = row["track_id"]
 
-    return track_id
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+    songData = songs[songs["track_id"] == track_id]
+    return songData
 
 
 @app.get("/genres")
