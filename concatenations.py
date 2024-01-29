@@ -23,7 +23,7 @@ df_predict.write.parquet(path="/user/s2549182/MBD/genre_predictions", mode="over
 
 #------------------YEAR_DATA----------------------------------------
 # read the data from the HDFS
-df_yearly = spark.read.csv("/user/s2549182/MBD/year_distributions_[A-E]").groupBy("_c0").agg(*(sum("_c"+str(g+1)) for g in range(14))).sort("_c0")
+df_yearly = spark.read.csv("/user/s2549182/MBD/year_distributions_[A-E]").groupBy("_c0").agg(*(sum("_c"+str(g+1)) for g in range(15))).sort("_c0")
 
 # export the dataFrame to the HDFS
 df_yearly.write.csv(path="/user/s2549182/MBD/year_distributions", mode="overwrite")
