@@ -1,4 +1,5 @@
 from fastapi import Body, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import sys
 import pandas
@@ -9,6 +10,19 @@ sys.path.append("..")
 
 app = FastAPI()
 
+origins = [
+    "http://localhost",
+    "http://localhost:60201",
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 results = pandas.read_parquet("../results.parquet")
 songs = pandas.read_csv("../songNames.csv")
 

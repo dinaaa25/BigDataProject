@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mbd_website/presentation/selection_page/song_picker_page.dart';
 import 'package:mbd_website/injection.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My Bubble Diary',
-      theme: ThemeData(
+    var themeData = ThemeData(
         primaryColor: spotifyBlack, // Spotify Black
         colorScheme: ColorScheme.fromSwatch()
             .copyWith(secondary: spotifyGreen), // Spotify Green
@@ -30,14 +30,13 @@ class MyApp extends StatelessWidget {
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: spotifyGreen, // FAB color
           foregroundColor: Colors.white,
-        ),
-        textTheme: TextTheme(
-          bodyText1: TextStyle(color: Colors.white),
-          bodyText2: TextStyle(color: Colors.white),
-          // Define other text styles if needed
-        ),
-        // Additional customizations can go here
-      ),
+        ));
+    themeData = themeData.copyWith(
+      textTheme: GoogleFonts.kanitTextTheme(themeData.textTheme),
+    );
+    return MaterialApp(
+      title: 'Mapify',
+      theme: themeData,
       home: SongPickerPage(),
     );
   }
