@@ -27,7 +27,7 @@ var baseGenre = {
 
 @LazySingleton(as: IGetSongRepo)
 class GetSongRepo implements IGetSongRepo {
-  Dio songApi = Dio(BaseOptions(baseUrl: "http://167.71.6.210/"));
+  Dio songApi = Dio(BaseOptions(baseUrl: "https://mapserver.fly.dev/"));
 
   @override
   Future<Either<Failure, Song>> getSong(

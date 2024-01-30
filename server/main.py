@@ -10,11 +10,7 @@ sys.path.append("..")
 
 app = FastAPI()
 
-origins = [
-    "http://localhost",
-    "http://localhost:60201",
-    "*",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,8 +19,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-results = pandas.read_parquet("../results.parquet")
-songs = pandas.read_csv("../songNames.csv")
+
+
+@app.get("/healthcheck")
+def read_root():
+    return {"status": "ok"}
+
+
+results = pandas.read_parquet("./results.parquet")
+songs = pandas.read_csv("./songNames.csv")
 
 
 def getSongByPercentages(percentages):
