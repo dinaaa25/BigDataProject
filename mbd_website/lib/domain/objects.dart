@@ -13,6 +13,16 @@ class Bubble {
       required this.yPosition});
 }
 
+Map<int, String> chordMap = {
+  1: "C Major",
+  2: "D Minor",
+  3: "E Minor",
+  4: "F Major",
+  5: "G Major",
+  6: "A Minor",
+  7: "B Dim",
+};
+
 class Song {
   final String title;
   final String? artistName;
@@ -27,11 +37,22 @@ class Song {
       this.key,
       this.artistName});
 
+  get letterKey {
+    return chordMap[this.key];
+  }
+
+  get readableYear {
+    if (this.year == "0") {
+      return "Year Unknown";
+    }
+    return this.year;
+  }
+
   static Song fromJson(Map<String, dynamic> json) {
     return Song(
-        title: json["title"][0],
-        artistName: json["artist_name"][0],
-        key: json["key"][0],
-        year: json["year"][0]);
+        title: (json["title"] as Map).values.toList()[0],
+        artistName: (json["artist_name"] as Map).values.toList()[0],
+        key: (json["key"] as Map).values.toList()[0],
+        year: (json["year"] as Map).values.toList()[0]);
   }
 }
