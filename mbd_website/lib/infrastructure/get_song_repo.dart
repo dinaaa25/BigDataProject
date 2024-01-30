@@ -20,8 +20,8 @@ class GetSongRepo implements IGetSongRepo {
       genreMap["genres"][genres[i]] = percentages[i];
     }
     var res = await songApi.get("/predicted_song", data: genreMap);
-    if (res.isRedirect) {
-      var mySong = Song(title: "test", genrePercentages: []);
+    if (res.statusCode == 200) {
+      Song mySong = Song.fromJson(res.data);
       Either<Failure, Song> song = Right(mySong);
       return song;
     }
