@@ -1,5 +1,7 @@
 import 'package:another_flushbar/flushbar_helper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mbd_website/application/get_song_bloc/get_song_bloc.dart';
 import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,9 @@ import 'package:mbd_website/injection.dart';
 import 'package:mbd_website/main.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mbd_website/presentation/selection_page/widgets/song_pop_up_dialog.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SongPickerPage extends StatelessWidget {
   const SongPickerPage({super.key});
@@ -15,7 +20,21 @@ class SongPickerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Song Picker'),
+        title: Text(
+          'Song Picker',
+          style: GoogleFonts.kanit(),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () async => {
+                    launchUrl(await Uri.parse(
+                        'https://github.com/dinaaa25/BigDataProject'))
+                  },
+              child: Iconify(
+                Carbon.logo_github,
+                color: Colors.white,
+              ))
+        ],
       ),
       body: const BubbleScreen(),
     );
@@ -220,7 +239,8 @@ class _BubbleScreenState extends State<BubbleScreen> {
                                 onBubbleDroppedInBox: onBubbleDroppedInBox,
                                 circleCenter: center,
                                 circleRadius: circleRadius,
-                                onBubbleDraggedOutOfBox: onBubbleDraggedOutOfBox,
+                                onBubbleDraggedOutOfBox:
+                                    onBubbleDraggedOutOfBox,
                                 percentage: null,
                                 index: null,
                                 isActive: false,
@@ -274,7 +294,7 @@ class _BubbleScreenState extends State<BubbleScreen> {
                               height: MediaQuery.of(context).size.height * 0.8,
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: Color(0xFF57534E)),
                               ),
                               child: Stack(children: [
                                 Stack(
