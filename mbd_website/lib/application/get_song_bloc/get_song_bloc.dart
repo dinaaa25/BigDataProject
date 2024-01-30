@@ -19,8 +19,6 @@ class GetSongBloc extends Bloc<GetSongEvent, GetSongState> {
       emit(const GetSongState.loading());
       final genres = event.genres;
       final percentages = event.percentages;
-      //dummySong
-      // Song dummySong = Song(title: 'Paris', genrePercentages: {'Pop': 0.5, 'Rock': 0.5});
       var result = await this._getSongRepo.getSong(genres, percentages);
 
       result.fold((l) => emit(GetSongState.loadFailure(l as Failure)),

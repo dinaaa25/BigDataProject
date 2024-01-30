@@ -39,6 +39,7 @@ class GetSongRepo implements IGetSongRepo {
 
     var res = await songApi.post("/predicted_song", data: userGenres);
     if (res.statusCode == 200) {
+      print(res);
       try {
         Song mySong = Song.fromJson(res.data);
         Either<Failure, Song> song = Right(mySong);
