@@ -22,7 +22,7 @@ class SongPickerPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Song Picker',
-          style: GoogleFonts.kanit(),
+          style: GoogleFonts.rubik(fontSize: 30, fontWeight: FontWeight.bold),
         ),
         actions: [
           TextButton(
@@ -61,33 +61,21 @@ class _BubbleScreenState extends State<BubbleScreen> {
   ];
 
   final List<String> inactiveGenres = [
-    'Country',
-    'Hip Hop',
-    'R&B',
-    'Electronic',
-    'Folk',
-    'Blues',
-    'Reggae',
-    'Punk',
-    'Disco',
-    'Funk',
-    'Soul',
-    'Techno',
-    'Gospel',
-    'Opera',
-    'Ska',
-    'New Age',
-    'Ambient',
-    'Industrial',
-    'Grunge',
-    'Dance',
-    'Dubstep',
-    'Drum and Bass',
-    'Trance',
-    'House',
-    'Garage',
-    'Hardcore',
-    'Hardstyle',
+    "Rock",
+    "Electronic",
+    "Pop",
+    "Jazz",
+    "RnB",
+    "Rap",
+    "Metal",
+    "Country",
+    "Blues",
+    "Reggae",
+    "Folk",
+    "Punk",
+    "Latin",
+    "World",
+    "New Age"
   ];
 
   List<double> percentages = [];

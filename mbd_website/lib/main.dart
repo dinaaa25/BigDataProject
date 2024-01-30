@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ));
     themeData = themeData.copyWith(
-      textTheme: GoogleFonts.kanitTextTheme(themeData.textTheme),
+      textTheme: GoogleFonts.rubikTextTheme(themeData.textTheme),
     );
     return MaterialApp(
       title: 'Mapify',
